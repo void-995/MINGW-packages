@@ -1,11 +1,6 @@
 # Maintainer (MSYS2): Ray Donnelly <mingw.android@gmail.com>
 
-if [ -n ${KF5_VARIANT} ]; then
-  _variant=-${KF5_VARIANT}
-else
-  _variant=-shared
-fi
-
+_variant=-${KF5_VARIANT:-shared}
 source "$(dirname ${BASH_SOURCE[0]})"/../mingw-w64-PKGBUILD-common/kde-frameworks5
 _kde_f5_init_package "${_variant}" "kglobalaccel"
 _kde_f5_add_depends "${_variant}" "kconfig" "ki18n"
@@ -35,15 +30,15 @@ build() {
     QT5_PREFIX=${MINGW_PREFIX}
   fi
 
-  MSYS2_ARG_CONV_EXCL=-DCMAKE_INSTALL_PREFIX= \
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=;-DECM_MKSPECS_INSTALL_DIR=" \
     cmake ../${_basename}-${pkgver} \
       -DCMAKE_BUILD_TYPE=$(_kde_f5_CMAKE_BUILD_TYPE) \
       -DCMAKE_INSTALL_PREFIX=${QT5_PREFIX} \
-      -DLIB_INSTALL_DIR=lib \
-      -DECM_MKSPECS_INSTALL_DIR=${QT5_PREFIX} \
+      -DKDE_INSTALL_LIBDIR=lib \
+      -DECM_MKSPECS_INSTALL_DIR=${QT5_PREFIX}/share/qt5/mkspecs \
       -DBUILD_TESTING=OFF \
       -DECM_DIR=${MINGW_PREFIX}/share/ECM \
-      -DKF5Config_DIR=${MINGW_PREFIX}/lib/cmake/KF5Config \
+      -DKF5Config_DIR=${QT5_PREFIX}/lib/cmake/KF5Config \
       "${extra_config[@]}" \
       -G'MSYS Makefiles'
   make
